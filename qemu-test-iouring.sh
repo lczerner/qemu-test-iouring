@@ -4,11 +4,12 @@ SUPPORTED_ARCH="x86_64 ppc64le"
 TOOL=$0
 
 usage() {
-	echo "Usage: $TOOL [-h] [-n] [-d] [-c] [-a ARCH] [-I IMG] [-r REPO]"
+	echo "Usage: $TOOL [-h] [-n] [-d] [-c] [-a ARCH] [-I IMG] [-r REPO] [-N NVME]"
 	echo "	-h		Print this help"
 	echo "	-a ARCH		Specify architecture to run (default: x86_64)."
 	echo "			Supported: $SUPPORTED_ARCH"
 	echo "	-I IMG		Image to run with. Must be specified."
+	echo "	-N NVME		Nvme image to run on."
 	echo "	-r REPO		Specify yum repository file to include in guest."
 	echo "			Can be repeated to include multiple files and"
 	echo "			implies image initialization."
@@ -17,6 +18,8 @@ usage() {
 	echo "			image initialization."
 	echo "	-c		Do not run on specified image, but rather create"
 	echo "			copy of it first."
+	echo ""
+	echo "Example: ./$TOOL -a ppc64le -r test.repo -c -I fedora.img -N nvme.img"
 }
 
 error() {
@@ -59,7 +62,7 @@ RC_LOCAL_MODE="0700"
 COPY_IMG=0
 
 # Parse options
-while getopts "ha:dr:I:nc" option; do
+while getopts "ha:dr:I:ncN:" option; do
 	case $option in
 	h)
 		usage; exit 0
@@ -87,13 +90,24 @@ while getopts "ha:dr:I:nc" option; do
 	c)
 		COPY_IMG=1
 		;;
+	N)
+		test_img $OPTARG
+		NVME_IMG=$OPTARG
+		;;
 	*)
 		error "Unrecognized option \"$option\""
 		;;
 	esac
 done
 
+
+if [ ! -e "$NVME_IMG" ]; then
+	NVME_IMG=$(mktemp)
+	fallocate -l10G $NVME_IMG || error "Fallocate \"$NVME_IMG\""
+fi
+
 [ -e "$IMG" ] || error "Image must be specified"
+[ -e "$NVME_IMG" ] || error "Nvme image must be specified"
 
 printf "ARCH\t\t${ARCH}\n"
 printf "IMG\t\t${IMG}\n"
@@ -124,10 +138,10 @@ fi
 # Run the qemu and test
 case $ARCH in
 	x86_64)
-		qemu-system-x86_64 -enable-kvm -m 8192 -smp 12 -cpu host -drive format=qcow2,index=0,if=virtio,file=$IMG -drive file=/dev/fedora_fs-i40c-06/nvme1,if=none,id=D22,format=raw -device nvme,drive=D22,serial=1234 -nographic
+		qemu-system-x86_64 -enable-kvm -m 8192 -smp 12 -cpu host -drive format=qcow2,index=0,if=virtio,file=$IMG -drive file=$NVME_IMG,if=none,id=D22,format=raw -device nvme,drive=D22,serial=1234 -nographic
 		;;
 	ppc64le)
-		qemu-system-ppc64 -M pseries-5.1 -m 8192 -smp 8 -drive format=qcow2,index=0,if=virtio,file=$IMG -drive file=/dev/fedora_fs-i40c-06/nvme2,if=none,id=D22,format=raw -device nvme,drive=D22,serial=1234 -nographic
+		qemu-system-ppc64 -M pseries-5.1 -m 8192 -smp 8 -drive format=qcow2,index=0,if=virtio,file=$IMG -drive file=$NVME_IMG,if=none,id=D22,format=raw -device nvme,drive=D22,serial=1234 -nographic
 		;;
 	*)
 		error "Unsupported architecture \"$ARCH\""
