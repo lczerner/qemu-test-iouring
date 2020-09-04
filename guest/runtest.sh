@@ -34,8 +34,10 @@ fi
 echo "SCRIPT_DIR = $SCRIPT_DIR"
 echo "CONFIG_FILE = $CONFIG_FILE"
 echo "LIBURING_GIT = $LIBURING_GIT"
-echo "EXCLUDE_TEST = $EXCLUDE_TEST"
+echo "TEST_EXCLUDE = $TEST_EXCLUDE"
 
+# This is for the liburing test so export it
+export TEST_EXCLUDE
 
 message "START"
 message "$UNAME"

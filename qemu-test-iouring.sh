@@ -134,7 +134,7 @@ ARCH="x86_64"
 IMG_INIT=1
 RC_LOCAL_MODE="0700"
 COPY_IMG=0
-EXCLUDE_TEST=""
+TEST_EXCLUDE=""
 IMG_SIZE="1G"
 
 # Load configuration
@@ -178,7 +178,7 @@ while getopts "ha:dr:I:ncN:e:" option; do
 		NVME_IMG=$OPTARG
 		;;
 	e)
-		EXCLUDE_TEST="$EXCLUDE_TEST $OPTARG"
+		TEST_EXCLUDE="$TEST_EXCLUDE $OPTARG"
 		;;
 	*)
 		error "Unrecognized option \"$option\""
@@ -200,13 +200,13 @@ printf "RC_LOCAL_MODE\t${RC_LOCAL_MODE}\n"
 printf "IMG_INIT\t${IMG_INIT}\n"
 printf "COPY IMAGE\t${COPY_IMG}\n"
 printf "COPY_IN\t\t${COPY_IN}\n"
-printf "EXCLUDE_TEST\t${EXCLUDE_TEST}\n"
+printf "TEST_EXCLUDE\t${TEST_EXCLUDE}\n"
 
 # Copy the image and run on the copy instead
 copy_image
 
 # Setup the configuration for the test in guest
-echo "EXCLUDE_TEST=\"$EXCLUDE_TEST\"" > $GUEST_DIR/local.config
+echo "TEST_EXCLUDE=\"$TEST_EXCLUDE\"" > $GUEST_DIR/local.config
 if [ -n "$LIBURING_GIT" ]; then
 	echo "LIBURING_GIT=\"$LIBURING_GIT\"" >> $GUEST_DIR/local.config
 fi
