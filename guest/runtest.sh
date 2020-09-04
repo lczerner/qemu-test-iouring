@@ -48,8 +48,8 @@ if [ $? -ne 0 ]; then
 	message "Updating packages"
 	dnf -y update
 	message "Installing packages"
-	dnf -y install wget vim
-	dnf -y groupinstall 'Development tools'
+	dnf -y install wget vim || exit 1
+	dnf -y groupinstall 'Development tools' || exit 1
 	reboot
 fi
 
