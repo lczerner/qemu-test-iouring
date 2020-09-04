@@ -207,6 +207,9 @@ copy_image
 
 # Setup the configuration for the test in guest
 echo "EXCLUDE_TEST=\"$EXCLUDE_TEST\"" > $GUEST_DIR/local.config
+if [ -n "$LIBURING_GIT" ]; then
+	echo "LIBURING_GIT=\"$LIBURING_GIT\"" >> $GUEST_DIR/local.config
+fi
 
 # Prepare the image
 initialize_image

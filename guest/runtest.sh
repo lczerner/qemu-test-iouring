@@ -18,6 +18,7 @@ TEST_DIR=/mnt
 FS_DEV=${NVME}p1
 TEST_DEV=${NVME}p2
 UNAME=$(uname -a)
+LIBURING_GIT="git://git.kernel.dk/liburing"
 
 [ ! -d "$TEST_DIR" ] && mkdir -r $TEST_DIR
 
@@ -73,7 +74,7 @@ mount $FS_DEV $TEST_DIR || exit 1
 # Clone liburing
 message "Get liburing"
 cd $TEST_DIR
-git clone git://git.kernel.dk/liburing
+git clone $LIBURING_GIT liburing
 cd $TEST_DIR/liburing
 ./configure && make -j8 || exit 1
 
