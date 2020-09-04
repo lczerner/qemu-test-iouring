@@ -11,6 +11,8 @@ message() {
 	wall -n "IO_URING_TEST: $@"
 }
 
+TEST_DIR=$(basename $0)
+CONFIG_FILE="$TEST_DIR/local.config"
 NVME=/dev/nvme0n1
 TEST_DIR=/mnt
 FS_DEV=${NVME}p1
@@ -23,6 +25,9 @@ if [ ! -b $NVME ]; then
 	echo "Nvme device \"$NVME\" does not exist!"
 	exit 1
 fi
+
+# Load configuration
+[ -f "$CONFIG_FILE" ] && . $CONFIG_FILE
 
 message "START"
 message "$UNAME"

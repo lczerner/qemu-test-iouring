@@ -21,6 +21,8 @@ usage() {
 	echo "			image initialization."
 	echo "	-c		Do not run on specified image, but rather create"
 	echo "			copy of it first."
+	echo "	-e		Exclude test. Can be repeated to exclude"
+	echo "			multiple tests."
 	echo ""
 	echo "Example: ./$TOOL -a ppc64le -r test.repo -c -I fedora.img -N nvme.img"
 }
@@ -76,6 +78,7 @@ ARCH="x86_64"
 IMG_INIT=1
 RC_LOCAL_MODE="0700"
 COPY_IMG=0
+EXCLUDE_TEST=""
 
 # Load configuration
 [ -f "$CONFIG_FILE" ] && . $CONFIG_FILE
@@ -85,7 +88,7 @@ COPY_IN="$COPY_IN $COPY_IN_GUEST"
 
 
 # Parse options
-while getopts "ha:dr:I:ncN:" option; do
+while getopts "ha:dr:I:ncN:e:" option; do
 	case $option in
 	h)
 		usage; exit 0
@@ -117,6 +120,9 @@ while getopts "ha:dr:I:ncN:" option; do
 		test_img $OPTARG
 		NVME_IMG=$OPTARG
 		;;
+	e)
+		EXCLUDE_TEST="$EXCLUDE_TEST $OPTARG"
+		;;
 	*)
 		error "Unrecognized option \"$option\""
 		;;
@@ -139,6 +145,7 @@ printf "RC_LOCAL_MODE\t${RC_LOCAL_MODE}\n"
 printf "INIT\t\t${INIT}\n"
 printf "COPY IMAGE\t${COPY_IMG}\n"
 printf "COPY_IN\t\t${COPY_IN}\n"
+printf "EXCLUDE_TEST\t${EXCLUDE_TEST}\n"
 
 # Copy the image and run on the copy instead
 if [ "$COPY_IMG" == "1" ]; then
@@ -148,6 +155,9 @@ if [ "$COPY_IMG" == "1" ]; then
 fi
 
 [ -e "$IMG" ] || error "Image must be specified"
+
+# Setup the configuration for the test in guest
+echo "EXCLUDE_TEST=\"$EXCLUDE_TEST\"" > $GUEST_DIR/local.config
 
 # Prepare the image
 if [ "$IMG_INIT" == "1" ]; then
