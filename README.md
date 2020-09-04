@@ -8,8 +8,10 @@ Simple set of scripts to run liburing tests on different architectures.
 		-h		Print this help
 		-a ARCH		Specify architecture to run (default: x86_64).
 				Supported: x86_64 ppc64le
-		-I IMG		Image to run with. Must be specified.
-		-N NVME		Nvme image to run on.
+		-I IMG		OS image with Fedora, Centos or Rhel. Must
+				be specified.
+		-N NVME		Nvme image to run on. It needs to be at least
+				1GB in size.
 		-r REPO		Specify yum repository file to include in guest.
 				Can be repeated to include multiple files and
 				implies image initialization.

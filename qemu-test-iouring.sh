@@ -8,7 +8,8 @@ usage() {
 	echo "	-h		Print this help"
 	echo "	-a ARCH		Specify architecture to run (default: x86_64)."
 	echo "			Supported: $SUPPORTED_ARCH"
-	echo "	-I IMG		Image to run with. Must be specified."
+	echo "	-I IMG		OS image with Fedora, Centos or Rhel. Must"
+	echo "			be specified."
 	echo "	-N NVME		Nvme image to run on. It needs to be at least"
 	echo "			1GB in size."
 	echo "	-r REPO		Specify yum repository file to include in guest."
@@ -50,6 +51,18 @@ test_reg_file() {
 		error "\"$1\" does not exist"
 	fi
 }
+
+check_util()
+{
+	local util=$1
+	command -v $util > /dev/null 2>&1 || error "Required utility \"$util\" is not found"
+}
+
+# Check for required utilities
+check_util truncate
+check_util virt-sysprep
+check_util qemu-system-x86_64
+check_util qemu-system-ppc64
 
 # Set default options
 GUEST_DIR="./guest"
@@ -110,6 +123,7 @@ fi
 [ -e "$IMG" ] || error "Image must be specified"
 [ -e "$NVME_IMG" ] || error "Nvme image must be specified"
 
+# Print options
 printf "ARCH\t\t${ARCH}\n"
 printf "IMG\t\t${IMG}\n"
 printf "RC_LOCAL_MODE\t${RC_LOCAL_MODE}\n"
