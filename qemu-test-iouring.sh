@@ -9,7 +9,8 @@ usage() {
 	echo "	-a ARCH		Specify architecture to run (default: x86_64)."
 	echo "			Supported: $SUPPORTED_ARCH"
 	echo "	-I IMG		Image to run with. Must be specified."
-	echo "	-N NVME		Nvme image to run on."
+	echo "	-N NVME		Nvme image to run on. It needs to be at least"
+	echo "			1GB in size."
 	echo "	-r REPO		Specify yum repository file to include in guest."
 	echo "			Can be repeated to include multiple files and"
 	echo "			implies image initialization."
@@ -100,10 +101,10 @@ while getopts "ha:dr:I:ncN:" option; do
 	esac
 done
 
-
+# Create nvme image if one was not provided
 if [ ! -e "$NVME_IMG" ]; then
 	NVME_IMG=$(mktemp)
-	fallocate -l10G $NVME_IMG || error "Fallocate \"$NVME_IMG\""
+	truncate -s1G $NVME_IMG || error "Fallocate \"$NVME_IMG\""
 fi
 
 [ -e "$IMG" ] || error "Image must be specified"

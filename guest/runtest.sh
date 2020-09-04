@@ -2,15 +2,8 @@
 
 create_part_setup() {
 cat << EOF
-label: gpt
-label-id: 88E12A0C-EA80-8A45-9A6F-205B50BF188D
-device: /dev/nvme0n1
-unit: sectors
-first-lba: 2048
-last-lba: 20971486
-
-/dev/nvme0n1p1 : start=        2048, size=    10485760, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=A3BAF6A7-F7DB-9C40-9587-907CA7CD5949
-/dev/nvme0n1p2 : start=    10487808, size=    10483679, type=0FC63DAF-8483-4772-8E79-3D69D8477DE4, uuid=68B8F075-B469-164F-90AC-9A740E7D8843
+/dev/nvme0n1p1 : start=2048, size=1024000
+/dev/nvme0n1p2 : start=1026048, size=1024000
 EOF
 }
 
@@ -23,6 +16,13 @@ TEST_DIR=/mnt
 FS_DEV=${NVME}p1
 TEST_DEV=${NVME}p2
 UNAME=$(uname -a)
+
+[ ! -d "$TEST_DIR" ] && mkdir -r $TEST_DIR
+
+if [ ! -b $NVME ]; then
+	echo "Nvme device \"$NVME\" does not exist!"
+	exit 1
+fi
 
 message "START"
 message "$UNAME"
@@ -61,7 +61,7 @@ sync
 
 # Create fs
 message "Create filesystem"
-mkfs.ext4 -F $FS_DEV
+mke2fs -t ext4 -F $FS_DEV
 mount $FS_DEV $TEST_DIR || exit 1
 
 
