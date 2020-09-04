@@ -1,6 +1,7 @@
 #!/bin/bash
 
 SUPPORTED_ARCH="x86_64 ppc64le"
+CONFIG_FILE="./local.config"
 TOOL=$0
 
 usage() {
@@ -68,12 +69,20 @@ check_util qemu-system-ppc64
 GUEST_DIR="./guest"
 GUEST_TEST="/root/$(basename $GUEST_DIR)/runtest.sh"
 GUEST_LOG="/root/test.log"
-COPY_IN="--copy-in $GUEST_DIR:/root"
+COPY_IN_GUEST="--copy-in $GUEST_DIR:/root"
+COPY_IN=""
 REPO_DIR="/etc/yum.repos.d/"
 ARCH="x86_64"
-INIT=1
+IMG_INIT=1
 RC_LOCAL_MODE="0700"
 COPY_IMG=0
+
+# Load configuration
+[ -f "$CONFIG_FILE" ] && . $CONFIG_FILE
+
+# Update the options based on configuration
+COPY_IN="$COPY_IN $COPY_IN_GUEST"
+
 
 # Parse options
 while getopts "ha:dr:I:ncN:" option; do
@@ -141,7 +150,7 @@ fi
 [ -e "$IMG" ] || error "Image must be specified"
 
 # Prepare the image
-if [ "$INIT" == "1" ]; then
+if [ "$IMG_INIT" == "1" ]; then
 	virt-sysprep -a $IMG --root-password password:root \
 		$COPY_IN \
 		--write /etc/modprobe.d/nvme.conf:"options nvme poll_queues=4" \
