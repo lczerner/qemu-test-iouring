@@ -11,8 +11,8 @@ message() {
 	wall -n "IO_URING_TEST: $@"
 }
 
-TEST_DIR=$(basename $0)
-CONFIG_FILE="$TEST_DIR/local.config"
+SCRIPT_DIR=$(dirname $0)
+CONFIG_FILE="$SCRIPT_DIR/local.config"
 NVME=/dev/nvme0n1
 TEST_DIR=/mnt
 FS_DEV=${NVME}p1
@@ -29,6 +29,13 @@ fi
 
 # Load configuration
 [ -f "$CONFIG_FILE" ] && . $CONFIG_FILE
+
+# Print out configuration
+echo "SCRIPT_DIR = $SCRIPT_DIR"
+echo "CONFIG_FILE = $CONFIG_FILE"
+echo "LIBURING_GIT = $LIBURING_GIT"
+echo "EXCLUDE_TEST = $EXCLUDE_TEST"
+
 
 message "START"
 message "$UNAME"
