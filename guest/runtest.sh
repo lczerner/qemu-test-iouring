@@ -12,7 +12,7 @@ message() {
 }
 
 SCRIPT_DIR=$(dirname $0)
-CONFIG_FILE="$SCRIPT_DIR/local.config"
+CONFIG_FILE="$SCRIPT_DIR/config.local"
 NVME=/dev/nvme0n1
 TEST_DIR=/mnt
 FS_DEV=${NVME}p1

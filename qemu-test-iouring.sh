@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SUPPORTED_ARCH="x86_64 ppc64le"
-CONFIG_FILE="./local.config"
+CONFIG_FILE="./config.local"
 TOOL=$0
 
 usage() {
@@ -206,9 +206,9 @@ printf "TEST_EXCLUDE\t${TEST_EXCLUDE}\n"
 copy_image
 
 # Setup the configuration for the test in guest
-echo "TEST_EXCLUDE=\"$TEST_EXCLUDE\"" > $GUEST_DIR/local.config
+echo "TEST_EXCLUDE=\"$TEST_EXCLUDE\"" > $GUEST_DIR/config.local
 if [ -n "$LIBURING_GIT" ]; then
-	echo "LIBURING_GIT=\"$LIBURING_GIT\"" >> $GUEST_DIR/local.config
+	echo "LIBURING_GIT=\"$LIBURING_GIT\"" >> $GUEST_DIR/config.local
 fi
 
 # Prepare the image
