@@ -12,7 +12,7 @@ usage() {
 	echo "	-a ARCH		Specify architecture to run (default: x86_64)."
 	echo "			Supported: $SUPPORTED_ARCH"
 	echo "	-I IMG		OS image with Fedora, Centos or Rhel. Can be"
-	echo "			existing file, or http(s) url. Must be specified."
+	echo "			existing file, or http(s) url."
 	echo "	-N NVME		Nvme image to run on. It needs to be at least"
 	echo "			1GB in size."
 	echo "	-r REPO		Specify yum repository file to include in guest."
@@ -132,13 +132,14 @@ CREATE_DIR=""
 RC_LOCAL_MODE="0700"
 NVME_SIZE="1G"
 
-# All option specified in config file
+# Set default options that can be
+# specified in config file
 ARCH="x86_64"
 IMG_INIT=1
 COPY_IMG=0
 COPY_IN=""
 TEST_EXCLUDE=""
-IMG=""
+IMG="https://ewr.edge.kernel.org/fedora-buffet/fedora/linux/releases/32/Cloud/x86_64/images/Fedora-Cloud-Base-32-1.6.x86_64.qcow2"
 NVME_IMG=""
 LIBURING_GIT="git://git.kernel.dk/liburing -b master"
 
