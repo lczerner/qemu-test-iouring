@@ -86,6 +86,7 @@ initialize_image()
 	virt-sysprep -a $IMG --root-password password:root \
 		$CREATE_DIR \
 		$COPY_IN \
+		--edit '/etc/sysconfig/selinux:s/^SELINUX=.*/SELINUX=disabled/' \
 		--write /etc/modprobe.d/nvme.conf:"options nvme poll_queues=4" \
 		--append-line /etc/rc.local:"/bin/bash -c '$GUEST_TEST > $GUEST_LOG 2>&1' &" \
 		--chmod $RC_LOCAL_MODE:/etc/rc.local \
