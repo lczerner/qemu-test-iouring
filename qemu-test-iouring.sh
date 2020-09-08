@@ -69,9 +69,9 @@ check_util()
 create_image()
 {
 	[ -n "$NVME_IMG" ] && return
-	[ -n "$TEST_DEBUG" ] && return
 
 	NVME_IMG=$(mktemp)
+	[ -n "$TEST_DEBUG" ] && return
 	truncate -s${NVME_SIZE} $NVME_IMG || error "Fallocate \"$NVME_IMG\""
 }
 
