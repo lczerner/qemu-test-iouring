@@ -8,7 +8,7 @@ EOF
 }
 
 message() {
-	wall -n "IO_URING_TEST: $@"
+	echo "IO_URING_TEST: $@" | tee /dev/kmsg
 }
 
 SCRIPT_DIR=$(dirname $0)
