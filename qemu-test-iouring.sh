@@ -11,8 +11,8 @@ usage() {
 	echo "			can only be specified once. (Default \"$CONFIG_FILE\")"
 	echo "	-a ARCH		Specify architecture to run (default: x86_64)."
 	echo "			Supported: $SUPPORTED_ARCH"
-	echo "	-I IMG		OS image with Fedora, Centos or Rhel. Must"
-	echo "			be specified."
+	echo "	-I IMG		OS image with Fedora, Centos or Rhel. Can be"
+	echo "			existing file, or http(s) url. Must be specified."
 	echo "	-N NVME		Nvme image to run on. It needs to be at least"
 	echo "			1GB in size."
 	echo "	-r REPO		Specify yum repository file to include in guest."
@@ -41,13 +41,6 @@ test_arch() {
 	echo $SUPPORTED_ARCH | grep -w $1 > /dev/null 2>&1
 	if [ $? -ne 0 ]; then
 		error "\"$1\" is not supported architecture"
-	fi
-}
-
-test_img() {
-	[ -z "$1" ] && error "Image not specified"
-	if [ ! -e "$1" ]; then
-		error "\"$1\" does not exist"
 	fi
 }
 
@@ -126,6 +119,7 @@ check_util truncate
 check_util virt-sysprep
 check_util qemu-system-x86_64
 check_util qemu-system-ppc64
+check_util wget
 
 # Set default options
 GUEST_DIR="./guest"
@@ -189,7 +183,6 @@ while getopts "ha:dr:I:ncN:e:p:C:" option; do
 		IMG_INIT=1
 		;;
 	I)
-		test_img $OPTARG
 		IMG=$OPTARG
 		;;
 	d)
@@ -200,7 +193,6 @@ while getopts "ha:dr:I:ncN:e:p:C:" option; do
 		COPY_IMG=1
 		;;
 	N)
-		test_img $OPTARG
 		NVME_IMG=$OPTARG
 		;;
 	e)
@@ -221,10 +213,20 @@ while getopts "ha:dr:I:ncN:e:p:C:" option; do
 	esac
 done
 
+# Download OS image if needed
+
+# Is it http or https link ?
+echo $IMG | grep -E '^(http|https)://' > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+	wget -q --show-progress --no-check-certificate -N $IMG
+	[ $? -ne 0 ] && error "Downloading OS image failed"
+	IMG=$(basename $IMG)
+fi
+[ -e "$IMG" ] || error "Valid OS image must be specified"
+
 # Create nvme image if one was not provided
 create_image
 
-[ -e "$IMG" ] || error "Image must be specified"
 [ -e "$NVME_IMG" ] || error "Nvme image must be specified"
 
 # Print options
