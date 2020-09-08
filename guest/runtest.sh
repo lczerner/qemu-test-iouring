@@ -50,6 +50,16 @@ if [ $? -ne 0 ]; then
 	message "Installing packages"
 	dnf -y install wget vim || exit 1
 	dnf -y groupinstall 'Development tools' || exit 1
+	message "Installing custom rpms"
+	if [ -d "$RPM_DIR" ]; then
+		dnf -y install --skip-broken $RPM_DIR/*.rpm
+		# If you want to install customer kernel Fedora is so dumb
+		# it needs to be specifically said to boot that kernel
+		# as well. This is the best way I know of ATM. (sigh)
+		grub2-set-default 0
+	fi
+	message "Cleaning cache"
+	dnf -y clean all
 	reboot
 fi
 

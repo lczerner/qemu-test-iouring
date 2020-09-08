@@ -20,5 +20,8 @@ Simple set of scripts to run liburing tests on different architectures.
 				image initialization.
 		-c		Do not run on specified image, but rather create
 				copy of it first.
+		-e		Exclude test. Can be repeated to exclude
+				multiple tests.
+		-p PKG		RPM package to install in guest
 
 	Example: ././qemu-test-iouring.sh -a ppc64le -r test.repo -c -I fedora.img -N nvme.img

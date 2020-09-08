@@ -23,6 +23,7 @@ usage() {
 	echo "			copy of it first."
 	echo "	-e		Exclude test. Can be repeated to exclude"
 	echo "			multiple tests."
+	echo "	-p PKG		RPM package to install in guest"
 	echo ""
 	echo "Example: ./$TOOL -a ppc64le -r test.repo -c -I fedora.img -N nvme.img"
 }
@@ -88,6 +89,7 @@ initialize_image()
 	[ -n "$TEST_DEBUG" ] && return
 
 	virt-sysprep -a $IMG --root-password password:root \
+		$CREATE_DIR \
 		$COPY_IN \
 		--write /etc/modprobe.d/nvme.conf:"options nvme poll_queues=4" \
 		--append-line /etc/rc.local:"/bin/bash -c '$GUEST_TEST > $GUEST_LOG 2>&1' &" \
@@ -127,9 +129,12 @@ check_util qemu-system-ppc64
 GUEST_DIR="./guest"
 GUEST_TEST="/root/$(basename $GUEST_DIR)/runtest.sh"
 GUEST_LOG="/root/test.log"
+GUEST_RPM_DIR="/root/rpms"
+GUEST_REPO_DIR="/etc/yum.repos.d/"
+
 COPY_IN_GUEST="--copy-in $GUEST_DIR:/root"
+CREATE_DIR=""
 COPY_IN=""
-REPO_DIR="/etc/yum.repos.d/"
 ARCH="x86_64"
 IMG_INIT=1
 RC_LOCAL_MODE="0700"
@@ -145,7 +150,7 @@ COPY_IN="$COPY_IN $COPY_IN_GUEST"
 
 
 # Parse options
-while getopts "ha:dr:I:ncN:e:" option; do
+while getopts "ha:dr:I:ncN:e:p:" option; do
 	case $option in
 	h)
 		usage; exit 0
@@ -159,7 +164,7 @@ while getopts "ha:dr:I:ncN:e:" option; do
 		;;
 	r)
 		test_reg_file $OPTARG
-		COPY_IN="$COPY_IN --copy-in $OPTARG:$REPO_DIR"
+		COPY_IN="$COPY_IN --copy-in $OPTARG:$GUEST_REPO_DIR"
 		IMG_INIT=1
 		;;
 	I)
@@ -179,6 +184,11 @@ while getopts "ha:dr:I:ncN:e:" option; do
 		;;
 	e)
 		TEST_EXCLUDE="$TEST_EXCLUDE $OPTARG"
+		;;
+	p)
+		CREATE_DIR="--mkdir $GUEST_RPM_DIR"
+		test_reg_file $OPTARG
+		COPY_IN="$COPY_IN --copy-in $OPTARG:$GUEST_RPM_DIR"
 		;;
 	*)
 		error "Unrecognized option \"$option\""
@@ -210,6 +220,7 @@ echo "TEST_EXCLUDE=\"$TEST_EXCLUDE\"" > $GUEST_DIR/config.local
 if [ -n "$LIBURING_GIT" ]; then
 	echo "LIBURING_GIT=\"$LIBURING_GIT\"" >> $GUEST_DIR/config.local
 fi
+echo "RPM_DIR=\"$GUEST_RPM_DIR\"" >> $GUEST_DIR/config.local
 
 # Prepare the image
 initialize_image
