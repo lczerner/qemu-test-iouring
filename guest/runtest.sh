@@ -42,6 +42,12 @@ export TEST_EXCLUDE
 message "START"
 message "$UNAME"
 
+# Wait for network
+while ! ping -w2 -c1 1.1.1.1; do
+	message "Network unavailable"
+	sleep 1
+done
+
 # Update the machine and install required packages if necessary
 dnf group summary "Development tools" | grep "Installed Groups"
 if [ $? -ne 0 ]; then
