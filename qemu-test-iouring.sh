@@ -7,6 +7,8 @@ TOOL=$0
 usage() {
 	echo "Usage: $TOOL [-h] [-n] [-d] [-c] [-a ARCH] [-I IMG] [-r REPO] [-N NVME]"
 	echo "	-h		Print this help"
+	echo "	-C CONFIG	Specify custom configuration file. This option"
+	echo "			can only be specified once. (Default \"$CONFIG_FILE\")"
 	echo "	-a ARCH		Specify architecture to run (default: x86_64)."
 	echo "			Supported: $SUPPORTED_ARCH"
 	echo "	-I IMG		OS image with Fedora, Centos or Rhel. Must"
@@ -70,7 +72,7 @@ create_image()
 	[ -n "$TEST_DEBUG" ] && return
 
 	NVME_IMG=$(mktemp)
-	truncate -s${IMG_SIZE} $NVME_IMG || error "Fallocate \"$NVME_IMG\""
+	truncate -s${NVME_SIZE} $NVME_IMG || error "Fallocate \"$NVME_IMG\""
 }
 
 copy_image()
@@ -132,25 +134,44 @@ GUEST_LOG="/root/test.log"
 GUEST_RPM_DIR="/root/rpms"
 GUEST_REPO_DIR="/etc/yum.repos.d/"
 
-COPY_IN_GUEST="--copy-in $GUEST_DIR:/root"
 CREATE_DIR=""
-COPY_IN=""
+RC_LOCAL_MODE="0700"
+NVME_SIZE="1G"
+
+# All option specified in config file
 ARCH="x86_64"
 IMG_INIT=1
-RC_LOCAL_MODE="0700"
 COPY_IMG=0
+COPY_IN=""
 TEST_EXCLUDE=""
-IMG_SIZE="1G"
+IMG=""
+NVME_IMG=""
+LIBURING_GIT="git://git.kernel.dk/liburing -b master"
 
-# Load configuration
+# To avoid hassle with overwriting specified commandline option with the
+# options from config file, just search of the -C option here, set the
+# CONFIG_FILE and ignore that option later
+set_config=0
+for opt in "$@"; do
+	if [ "$opt" == "-C" ]; then
+		set_config=1
+		continue
+	elif [ "$set_config" -eq 1 ]; then
+		test_reg_file $opt
+		CONFIG_FILE=$opt
+		break
+	fi
+done
+set_config=0
+
+# Load configuration file
 [ -f "$CONFIG_FILE" ] && . $CONFIG_FILE
 
-# Update the options based on configuration
-COPY_IN="$COPY_IN $COPY_IN_GUEST"
-
+# Copy in guest dir
+COPY_IN="$COPY_IN --copy-in $GUEST_DIR:/root"
 
 # Parse options
-while getopts "ha:dr:I:ncN:e:p:" option; do
+while getopts "ha:dr:I:ncN:e:p:C:" option; do
 	case $option in
 	h)
 		usage; exit 0
@@ -189,6 +210,10 @@ while getopts "ha:dr:I:ncN:e:p:" option; do
 		CREATE_DIR="--mkdir $GUEST_RPM_DIR"
 		test_reg_file $OPTARG
 		COPY_IN="$COPY_IN --copy-in $OPTARG:$GUEST_RPM_DIR"
+		;;
+	C)
+		[ "$set_config" -eq 1 ] && error "You can only specify CONFIG once"
+		set_config=1
 		;;
 	*)
 		error "Unrecognized option \"$option\""
