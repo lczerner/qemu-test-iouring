@@ -88,8 +88,10 @@ initialize_image()
 		$COPY_IN \
 		--edit '/etc/sysconfig/selinux:s/^SELINUX=.*/SELINUX=disabled/' \
 		--write /etc/modprobe.d/nvme.conf:"options nvme poll_queues=4" \
-		--append-line /etc/rc.local:"/bin/bash -c '$GUEST_TEST > $GUEST_LOG 2>&1' &" \
-		--chmod $RC_LOCAL_MODE:/etc/rc.local \
+		--append-line $GUEST_RC_LOCAL:"/bin/bash -c '$GUEST_TEST > $GUEST_LOG 2>&1' &" \
+		--write $GUEST_RC_LOCAL:"#!/bin/bash
+$GUEST_TEST > $GUEST_LOG 2>&1 &" \
+		--chmod $RC_LOCAL_MODE:$GUEST_RC_LOCAL \
 		|| error "virt-sysprep failed"
 }
 
@@ -128,6 +130,7 @@ GUEST_TEST="/root/$(basename $GUEST_DIR)/runtest.sh"
 GUEST_LOG="/root/test.log"
 GUEST_RPM_DIR="/root/rpms"
 GUEST_REPO_DIR="/etc/yum.repos.d/"
+GUEST_RC_LOCAL="/etc/rc.d/rc.local"
 
 CREATE_DIR=""
 RC_LOCAL_MODE="0700"
