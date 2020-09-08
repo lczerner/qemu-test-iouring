@@ -168,7 +168,7 @@ set_config=0
 [ -f "$CONFIG_FILE" ] && . $CONFIG_FILE
 
 # Copy in guest dir
-COPY_IN="$COPY_IN --copy-in $GUEST_DIR:/root"
+COPY_IN="--copy-in $GUEST_DIR:/root $COPY_IN"
 
 # Parse options
 while getopts "ha:dr:I:ncN:e:p:C:" option; do
@@ -185,7 +185,7 @@ while getopts "ha:dr:I:ncN:e:p:C:" option; do
 		;;
 	r)
 		test_reg_file $OPTARG
-		COPY_IN="$COPY_IN --copy-in $OPTARG:$GUEST_REPO_DIR"
+		COPY_IN="--copy-in $OPTARG:$GUEST_REPO_DIR $COPY_IN"
 		IMG_INIT=1
 		;;
 	I)
@@ -204,12 +204,12 @@ while getopts "ha:dr:I:ncN:e:p:C:" option; do
 		NVME_IMG=$OPTARG
 		;;
 	e)
-		TEST_EXCLUDE="$TEST_EXCLUDE $OPTARG"
+		TEST_EXCLUDE="$OPTARG $TEST_EXCLUDE"
 		;;
 	p)
 		CREATE_DIR="--mkdir $GUEST_RPM_DIR"
 		test_reg_file $OPTARG
-		COPY_IN="$COPY_IN --copy-in $OPTARG:$GUEST_RPM_DIR"
+		COPY_IN="--copy-in $OPTARG:$GUEST_RPM_DIR $COPY_IN"
 		;;
 	C)
 		[ "$set_config" -eq 1 ] && error "You can only specify CONFIG once"
@@ -228,14 +228,16 @@ create_image
 [ -e "$NVME_IMG" ] || error "Nvme image must be specified"
 
 # Print options
-printf "ARCH\t\t${ARCH}\n"
-printf "IMG\t\t${IMG}\n"
-printf "NVME_IMG\t${NVME_IMG}\n"
-printf "RC_LOCAL_MODE\t${RC_LOCAL_MODE}\n"
-printf "IMG_INIT\t${IMG_INIT}\n"
-printf "COPY IMAGE\t${COPY_IMG}\n"
-printf "COPY_IN\t\t${COPY_IN}\n"
-printf "TEST_EXCLUDE\t${TEST_EXCLUDE}\n"
+printf "Architecture:\t\t${ARCH}\n"
+printf "OS Image:\t\t${IMG}\n"
+printf "NVME Image\t\t${NVME_IMG}\n"
+printf "/etc/rc.local mode:\t${RC_LOCAL_MODE}\n"
+printf "Initialize image:\t${IMG_INIT}\n"
+printf "Copy image:\t\t${COPY_IMG}\n"
+printf "COPY_IN:\t\t${COPY_IN}\n"
+printf "Exclude tests:\t\t${TEST_EXCLUDE}\n"
+printf "Config file:\t\t${CONFIG_FILE}\n"
+printf "Liburing repository:\t${LIBURING_GIT}\n"
 
 # Copy the image and run on the copy instead
 copy_image
