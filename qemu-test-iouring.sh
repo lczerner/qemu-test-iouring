@@ -86,11 +86,12 @@ initialize_image()
 	virt-sysprep -a $IMG --root-password password:root \
 		$CREATE_DIR \
 		$COPY_IN \
+		--mkdir $GUEST_LOG_DIR \
 		--edit '/etc/sysconfig/selinux:s/^SELINUX=.*/SELINUX=disabled/' \
 		--write /etc/modprobe.d/nvme.conf:"options nvme poll_queues=4" \
 		--append-line $GUEST_RC_LOCAL:"/bin/bash -c '$GUEST_TEST > $GUEST_LOG 2>&1' &" \
 		--write $GUEST_RC_LOCAL:"#!/bin/bash
-$GUEST_TEST > $GUEST_LOG 2>&1 &" \
+$GUEST_TEST >> $GUEST_LOG 2>&1 &" \
 		--chmod $RC_LOCAL_MODE:$GUEST_RC_LOCAL \
 		|| error "virt-sysprep failed"
 }
@@ -117,17 +118,29 @@ run_ppc64le()
 		-nographic
 }
 
+copy_out_results()
+{
+	[ -n "$TEST_DEBUG" ] && return
+
+	local outdir="${RESULT_DIR}/$(date +%Y-%m-%d_%H:%M)_$ARCH"
+	mkdir -p $outdir
+
+	virt-copy-out -a $IMG $GUEST_LOG_DIR $outdir || error "Copying results failed"
+}
+
 # Check for required utilities
 check_util truncate
 check_util virt-sysprep
 check_util qemu-system-x86_64
 check_util qemu-system-ppc64
 check_util wget
+check_util virt-copy-out
 
 # Set default options
+GUEST_LOG_DIR="/root/logs"
 GUEST_DIR="./guest"
 GUEST_TEST="/root/$(basename $GUEST_DIR)/runtest.sh"
-GUEST_LOG="/root/test.log"
+GUEST_LOG="$GUEST_LOG_DIR/output.log"
 GUEST_RPM_DIR="/root/rpms"
 GUEST_REPO_DIR="/etc/yum.repos.d/"
 GUEST_RC_LOCAL="/etc/rc.d/rc.local"
@@ -135,6 +148,7 @@ GUEST_RC_LOCAL="/etc/rc.d/rc.local"
 CREATE_DIR=""
 RC_LOCAL_MODE="0700"
 NVME_SIZE="1G"
+RESULT_DIR="./results"
 
 # Set default options that can be
 # specified in config file
@@ -271,3 +285,6 @@ case $ARCH in
 		error "Unsupported architecture \"$ARCH\""
 		;;
 esac
+
+# Copy out restult logs
+copy_out_results

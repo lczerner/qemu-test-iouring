@@ -139,13 +139,7 @@ rm -f ${LIBURING_LOG}.*
 # Run the test
 message "Run test"
 make runtests 2>&1 | tee ${LIBURING_LOG}.log
-if [ $? -ne 0 ]; then
-	mv ${LIBURING_LOG}.log ${LIBURING_LOG}.failed
-	message "Liburing tests failed"
-else
-	mv ${LIBURING_LOG}.log ${LIBURING_LOG}.done
-	message "Liburing tests successfull"
-fi
+
 cd /root
 
 # Done
