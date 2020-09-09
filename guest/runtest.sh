@@ -29,11 +29,13 @@ install_packages() {
 	# so let's try again. Remove the log files.
 	rm -f ${INSTALL_LOG}.*
 
-	message "Updating packages"
-	dnf -y update
+	# Packages to install
+	local packages="git make gcc e2fsprogs parted coreutils"
+
+	message "Updating kernel"
+	dnf -y update kernel
 	message "Installing packages"
-	dnf -y install wget vim || return 1
-	dnf -y groupinstall 'Development tools' || return 1
+	dnf -y install $packages || return 1
 	message "Installing custom rpms"
 	if [ -d "$RPM_DIR" ]; then
 		dnf -y install --skip-broken $RPM_DIR/*.rpm || return 1
@@ -42,8 +44,6 @@ install_packages() {
 		# as well. This is the best way I know of ATM. (sigh)
 		grub2-set-default 0
 	fi
-	message "Cleaning cache"
-	dnf -y clean all
 	return 0
 }
 
