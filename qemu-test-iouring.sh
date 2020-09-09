@@ -64,6 +64,7 @@ create_image()
 	[ -n "$NVME_IMG" ] && return
 
 	NVME_IMG=$(mktemp)
+	NVME_CREATED=1
 	[ -n "$TEST_DEBUG" ] && return
 	truncate -s${NVME_SIZE} $NVME_IMG || error "Fallocate \"$NVME_IMG\""
 }
@@ -126,6 +127,13 @@ copy_out_results()
 	mkdir -p $outdir
 
 	virt-copy-out -a $IMG $GUEST_LOG_DIR $outdir || error "Copying results failed"
+}
+
+exit_cleanup()
+{
+	if [ -n "$NVME_CREATED" ]; then
+		[ -n "$NVME_IMG" ] && rm -f $NVME_IMG
+	fi
 }
 
 # Check for required utilities
