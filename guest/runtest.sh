@@ -1,5 +1,10 @@
 #!/bin/bash
 
+LOG_DIR="/root/logs"
+mkdir -p $LOG_DIR
+INSTALL_LOG="$LOG_DIR/install"
+LIBURING_LOG="$LOG_DIR/liburing"
+
 create_part_setup() {
 cat << EOF
 /dev/nvme0n1p1 : start=2048, size=1024000
@@ -9,6 +14,37 @@ EOF
 
 message() {
 	echo "IO_URING_TEST: $@" | tee /dev/kmsg
+}
+
+stop_test() {
+	message "$@"
+	poweroff
+	exit
+}
+
+# Update the machine and install required packages if necessary
+# Return 0 on success and 1 on failure
+install_packages() {
+	# If we failed before user had a chance to change things
+	# so let's try again. Remove the log files.
+	rm -f ${INSTALL_LOG}.*
+
+	message "Updating packages"
+	dnf -y update
+	message "Installing packages"
+	dnf -y install wget vim || return 1
+	dnf -y groupinstall 'Development tools' || return 1
+	message "Installing custom rpms"
+	if [ -d "$RPM_DIR" ]; then
+		dnf -y install --skip-broken $RPM_DIR/*.rpm || return 1
+		# If you want to install customer kernel Fedora is so dumb
+		# it needs to be specifically said to boot that kernel
+		# as well. This is the best way I know of ATM. (sigh)
+		grub2-set-default 0
+	fi
+	message "Cleaning cache"
+	dnf -y clean all
+	return 0
 }
 
 SCRIPT_DIR=$(dirname $0)
@@ -23,8 +59,7 @@ LIBURING_GIT="git://git.kernel.dk/liburing"
 [ ! -d "$TEST_DIR" ] && mkdir -r $TEST_DIR
 
 if [ ! -b $NVME ]; then
-	echo "Nvme device \"$NVME\" does not exist!"
-	exit 1
+	stop_test "ERROR: Nvme device \"$NVME\" does not exist!"
 fi
 
 # Load configuration
@@ -48,31 +83,23 @@ while ! ping -w2 -c1 1.1.1.1; do
 	sleep 1
 done
 
-# Update the machine and install required packages if necessary
-dnf group summary "Development tools" | grep "Installed Groups"
-if [ $? -ne 0 ]; then
-	message "Updating packages"
-	dnf -y update
-	message "Installing packages"
-	dnf -y install wget vim || exit 1
-	dnf -y groupinstall 'Development tools' || exit 1
-	message "Installing custom rpms"
-	if [ -d "$RPM_DIR" ]; then
-		dnf -y install --skip-broken $RPM_DIR/*.rpm
-		# If you want to install customer kernel Fedora is so dumb
-		# it needs to be specifically said to boot that kernel
-		# as well. This is the best way I know of ATM. (sigh)
-		grub2-set-default 0
+# Skip if installation was already done
+if [ ! -f "${INSTALL_LOG}.done" ]; then
+	install_packages 2>&1 | tee ${INSTALL_LOG}.log
+	if [ $? -ne 0 ]; then
+		mv ${INSTALL_LOG}.log ${INSTALL_LOG}.failed
+		stop_test "ERROR: Installation failed"
+	else
+		mv ${INSTALL_LOG}.log ${INSTALL_LOG}.done
+		message "Installation done. Rebooting"
+		reboot
 	fi
-	message "Cleaning cache"
-	dnf -y clean all
-	reboot
 fi
 
 message "modprobe"
 umount $TEST_DIR
 modprobe -r nvme
-modprobe nvme || exit 1
+modprobe nvme || stop_test "ERROR: Modprobe nvme failed"
 sleep 1
 sync
 
@@ -86,14 +113,14 @@ sync
 # Create partition
 message "Create partitions"
 create_part_setup > nvme.part
-sfdisk $NVME < nvme.part || exit 1
+sfdisk $NVME < nvme.part || stop_test "ERROR: Creating partitions failed"
 sleep 2
 sync
 
 # Create fs
 message "Create filesystem"
 mke2fs -t ext4 -F $FS_DEV
-mount $FS_DEV $TEST_DIR || exit 1
+mount $FS_DEV $TEST_DIR || stop_test "ERROR: Mounting fs failed"
 
 
 # Clone liburing
@@ -101,19 +128,27 @@ message "Get liburing"
 cd $TEST_DIR
 git clone $LIBURING_GIT liburing
 cd $TEST_DIR/liburing
-./configure && make -j8 || exit 1
+./configure && make -j8 || stop_test "ERROR: Building liburing failed"
 
 # Prepare config
 echo "TEST_FILES=${TEST_DEV}" > test/config.local
 
+# Remove logs from previous run
+rm -f ${LIBURING_LOG}.*
+
 # Run the test
 message "Run test"
-make runtests
+make runtests 2>&1 | tee ${LIBURING_LOG}.log
+if [ $? -ne 0 ]; then
+	mv ${LIBURING_LOG}.log ${LIBURING_LOG}.failed
+	message "Liburing tests failed"
+else
+	mv ${LIBURING_LOG}.log ${LIBURING_LOG}.done
+	message "Liburing tests successfull"
+fi
 cd /root
 
 # Done
-message "$UNAME"
-message "DONE"
 umount $TEST_DIR
-echo "TEST DONE"
-exit 0
+message "$UNAME"
+stop_test "DONE"
