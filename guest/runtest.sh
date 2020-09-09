@@ -139,6 +139,7 @@ rm -f ${LIBURING_LOG}.*
 # Run the test
 message "Run test"
 make runtests 2>&1 | tee ${LIBURING_LOG}.log
+dmesg > ${LIBURING_LOG}.dmesg 2>&1
 
 cd /root
 
