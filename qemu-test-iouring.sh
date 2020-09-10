@@ -159,7 +159,7 @@ COPY_IN=""
 TEST_EXCLUDE=""
 IMG="https://ewr.edge.kernel.org/fedora-buffet/fedora/linux/releases/32/Cloud/x86_64/images/Fedora-Cloud-Base-32-1.6.x86_64.qcow2"
 NVME_IMG=""
-LIBURING_GIT="git://git.kernel.dk/liburing -b master"
+GUEST_LIBURING_GIT="git://git.kernel.dk/liburing -b master"
 GUEST_CPUS=4
 GUEST_MEMORY=2048
 
@@ -267,7 +267,7 @@ printf "Copy image:\t\t${COPY_IMG}\n"
 printf "COPY_IN:\t\t${COPY_IN}\n"
 printf "Exclude tests:\t\t${TEST_EXCLUDE}\n"
 printf "Config file:\t\t${CONFIG_FILE}\n"
-printf "Liburing repository:\t${LIBURING_GIT}\n"
+printf "Liburing repository:\t${GUEST_LIBURING_GIT}\n"
 printf "Guest memory:\t\t${GUEST_MEMORY}\n"
 printf "Guest CPUs:\t\t${GUEST_CPUS}\n"
 
@@ -276,8 +276,8 @@ copy_image
 
 # Setup the configuration for the test in guest
 echo "TEST_EXCLUDE=\"$TEST_EXCLUDE\"" > $GUEST_DIR/config.local
-if [ -n "$LIBURING_GIT" ]; then
-	echo "LIBURING_GIT=\"$LIBURING_GIT\"" >> $GUEST_DIR/config.local
+if [ -n "$GUEST_LIBURING_GIT" ]; then
+	echo "GUEST_LIBURING_GIT=\"$GUEST_LIBURING_GIT\"" >> $GUEST_DIR/config.local
 fi
 echo "RPM_DIR=\"$GUEST_RPM_DIR\"" >> $GUEST_DIR/config.local
 

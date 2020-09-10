@@ -29,7 +29,7 @@
 # NVME_IMG=""
 #
 # Specify liburing git repository and optionaly branch
-# LIBURING_GIT="git://git.kernel.dk/liburing -b master"
+# GUEST_LIBURING_GIT="git://git.kernel.dk/liburing -b master"
 #
 # How many cpus should the guest virtual machine have.
 # GUEST_CPUS=4

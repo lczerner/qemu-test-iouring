@@ -54,7 +54,7 @@ TEST_DIR=/mnt
 FS_DEV=${NVME}p1
 TEST_DEV=${NVME}p2
 UNAME=$(uname -a)
-LIBURING_GIT="git://git.kernel.dk/liburing"
+GUEST_LIBURING_GIT="git://git.kernel.dk/liburing"
 
 [ ! -d "$TEST_DIR" ] && mkdir -r $TEST_DIR
 
@@ -68,7 +68,7 @@ fi
 # Print out configuration
 echo "SCRIPT_DIR = $SCRIPT_DIR"
 echo "CONFIG_FILE = $CONFIG_FILE"
-echo "LIBURING_GIT = $LIBURING_GIT"
+echo "GUEST_LIBURING_GIT = $GUEST_LIBURING_GIT"
 echo "TEST_EXCLUDE = $TEST_EXCLUDE"
 
 # This is for the liburing test so export it
@@ -126,7 +126,7 @@ mount $FS_DEV $TEST_DIR || stop_test "ERROR: Mounting fs failed"
 # Clone liburing
 message "Get liburing"
 cd $TEST_DIR
-git clone $LIBURING_GIT liburing
+git clone $GUEST_LIBURING_GIT liburing
 cd $TEST_DIR/liburing
 ./configure && make -j8 || stop_test "ERROR: Building liburing failed"
 
