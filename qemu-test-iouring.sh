@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SUPPORTED_ARCH="x86_64 ppc64le"
+SUPPORTED_ARCH="x86_64 ppc64"
 CONFIG_FILE="./config.local"
 TOOL=$0
 
@@ -27,7 +27,7 @@ usage() {
 	echo "			multiple tests."
 	echo "	-p PKG		RPM package to install in guest"
 	echo ""
-	echo "Example: ./$TOOL -a ppc64le -r test.repo -c -I fedora.img -N nvme.img"
+	echo "Example: ./$TOOL -a ppc64 -r test.repo -c -I fedora.img -N nvme.img"
 }
 
 error() {
@@ -108,7 +108,7 @@ run_x86_64()
 		-nographic
 }
 
-run_ppc64le()
+run_ppc64()
 {
 	[ -n "$TEST_DEBUG" ] && return
 
@@ -289,8 +289,8 @@ case $ARCH in
 	x86_64)
 		run_x86_64
 		;;
-	ppc64le)
-		run_ppc64le
+	ppc64)
+		run_ppc64
 		;;
 	*)
 		error "Unsupported architecture \"$ARCH\""

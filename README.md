@@ -125,7 +125,7 @@ You can see what options are supported using help `./qemu-test-iouring.sh -h`
 		-C CONFIG	Specify custom configuration file. This option
 				can only be specified once. (Default "./config.local")
 		-a ARCH		Specify architecture to run (default: x86_64).
-				Supported: x86_64 ppc64le
+				Supported: x86_64 ppc64
 		-I IMG		OS image with Fedora, Centos or Rhel. Can be
 				existing file, or http(s) url.
 		-N NVME		Nvme image to run on. It needs to be at least
@@ -142,5 +142,5 @@ You can see what options are supported using help `./qemu-test-iouring.sh -h`
 				multiple tests.
 		-p PKG		RPM package to install in guest
 	
-	Example: ././qemu-test-iouring.sh -a ppc64le -r test.repo -c -I fedora.img -N nvme.img
+	Example: ././qemu-test-iouring.sh -a ppc64 -r test.repo -c -I fedora.img -N nvme.img
 
