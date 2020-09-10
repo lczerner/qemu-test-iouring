@@ -144,6 +144,7 @@ GUEST_LOG="$GUEST_LOG_DIR/output.log"
 GUEST_RPM_DIR="/root/rpms"
 GUEST_REPO_DIR="/etc/yum.repos.d/"
 GUEST_RC_LOCAL="/etc/rc.d/rc.local"
+GUEST_LIBURING_CONFIG="${GUEST_DIR}/liburing.config"
 
 CREATE_DIR=""
 RC_LOCAL_MODE="0700"
@@ -156,7 +157,7 @@ ARCH="x86_64"
 IMG_INIT=1
 COPY_IMG=0
 COPY_IN=""
-TEST_EXCLUDE=""
+LIBURING_TEST_EXCLUDE=""
 IMG="https://ewr.edge.kernel.org/fedora-buffet/fedora/linux/releases/32/Cloud/x86_64/images/Fedora-Cloud-Base-32-1.6.x86_64.qcow2"
 NVME_IMG=""
 GUEST_LIBURING_GIT="git://git.kernel.dk/liburing -b master"
@@ -217,7 +218,7 @@ while getopts "ha:dr:I:ncN:e:p:C:" option; do
 		NVME_IMG=$OPTARG
 		;;
 	e)
-		TEST_EXCLUDE="$OPTARG $TEST_EXCLUDE"
+		LIBURING_TEST_EXCLUDE="$OPTARG $LIBURING_TEST_EXCLUDE"
 		;;
 	p)
 		CREATE_DIR="--mkdir $GUEST_RPM_DIR"
@@ -265,7 +266,7 @@ printf "/etc/rc.local mode:\t${RC_LOCAL_MODE}\n"
 printf "Initialize image:\t${IMG_INIT}\n"
 printf "Copy image:\t\t${COPY_IMG}\n"
 printf "COPY_IN:\t\t${COPY_IN}\n"
-printf "Exclude tests:\t\t${TEST_EXCLUDE}\n"
+printf "Exclude tests:\t\t${LIBURING_TEST_EXCLUDE}\n"
 printf "Config file:\t\t${CONFIG_FILE}\n"
 printf "Liburing repository:\t${GUEST_LIBURING_GIT}\n"
 printf "Guest memory:\t\t${GUEST_MEMORY}\n"
@@ -274,8 +275,10 @@ printf "Guest CPUs:\t\t${GUEST_CPUS}\n"
 # Copy the image and run on the copy instead
 copy_image
 
+# Create configuration for liburing test
+sed -n 's/^[[:space:]]*LIBURING_//p' $CONFIG_FILE > $GUEST_LIBURING_CONFIG
+
 # Setup the configuration for the test in guest
-echo "TEST_EXCLUDE=\"$TEST_EXCLUDE\"" > $GUEST_DIR/config.local
 if [ -n "$GUEST_LIBURING_GIT" ]; then
 	echo "GUEST_LIBURING_GIT=\"$GUEST_LIBURING_GIT\"" >> $GUEST_DIR/config.local
 fi

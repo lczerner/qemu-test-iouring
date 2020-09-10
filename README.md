@@ -98,13 +98,10 @@ You can find example configuration file in `config.example`
 	# man virt-builder for more information on --copy-in option
 	# COPY_IN=""
 	#
-	# List of excluded tests
-	# TEST_EXCLUDE=""
-	#
-	# Default image to run with. Will be overriden by -I option
+	# Default image to run with. Will be overridden by -I option
 	# IMG=""
 	#
-	# Default nvme image to run with. Will be overriden by -N option
+	# Default nvme image to run with. Will be overridden by -N option
 	# NVME_IMG=""
 	#
 	# Specify liburing git repository and optionaly branch
@@ -115,6 +112,15 @@ You can find example configuration file in `config.example`
 	#
 	# How much memory should the quest virtual machine have.
 	# GUEST_MEMORY=2048
+	#
+	# In case you need setup configuration variable for liburing test itself,
+	# use this section and prepend the variable name with LIBURING_ it will be
+	# copied over when the test config file is create. Note that TEST_FILES
+	# will be overridden.
+	#
+	# List of excluded tests
+	# LIBURING_TEST_EXCLUDE=""
+	#
 
 ## Usage
 

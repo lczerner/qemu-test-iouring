@@ -69,10 +69,6 @@ fi
 echo "SCRIPT_DIR = $SCRIPT_DIR"
 echo "CONFIG_FILE = $CONFIG_FILE"
 echo "GUEST_LIBURING_GIT = $GUEST_LIBURING_GIT"
-echo "TEST_EXCLUDE = $TEST_EXCLUDE"
-
-# This is for the liburing test so export it
-export TEST_EXCLUDE
 
 message "START"
 message "$UNAME"
@@ -130,8 +126,9 @@ git clone $GUEST_LIBURING_GIT liburing
 cd $TEST_DIR/liburing
 ./configure && make -j8 || stop_test "ERROR: Building liburing failed"
 
-# Prepare config
-echo "TEST_FILES=${TEST_DEV}" > test/config.local
+# Prepare liburing test config file
+cp /root/guest/liburing.config test/config.local
+echo "TEST_FILES=${TEST_DEV}" >> test/config.local
 
 # Remove logs from previous run
 rm -f ${LIBURING_LOG}.*
