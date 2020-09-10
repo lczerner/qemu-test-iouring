@@ -8,7 +8,8 @@ architectures. This project aims to provide a convenient set of scripts to
 run liburing tests on qemu emulated nvme device with polling support on
 various architectures.
 
-Currently only x86_64 and ppc64 is supported, but I hope to expand it soon.
+Currently only x86_64, ppc64 and aarch64 is supported, but I hope to
+expand it soon.
 
 > This is still very much work-in-progress. Use with caution!
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 # SPDX-License-Identifier: GPL-2.0
 
-SUPPORTED_ARCH="x86_64 ppc64"
+SUPPORTED_ARCH="x86_64 ppc64 aarch64"
 CONFIG_FILE="./config.local"
 TOOL=$0
 
@@ -114,6 +114,17 @@ run_ppc64()
 	[ -n "$TEST_DEBUG" ] && return
 
 	qemu-system-ppc64 -M pseries-5.1 -m $GUEST_MEMORY -smp $GUEST_CPUS \
+		-drive format=qcow2,index=0,if=virtio,file=$IMG \
+		-drive file=$NVME_IMG,if=none,id=D22,format=raw \
+		-device nvme,drive=D22,serial=1234 \
+		-nographic
+}
+
+run_aarch64()
+{
+	[ -n "$TEST_DEBUG" ] && return
+
+	qemu-system-aarch64 -M raspi2 -m $GUEST_MEMORY -smp $GUEST_CPUS \
 		-drive format=qcow2,index=0,if=virtio,file=$IMG \
 		-drive file=$NVME_IMG,if=none,id=D22,format=raw \
 		-device nvme,drive=D22,serial=1234 \
@@ -241,6 +252,7 @@ check_util truncate
 check_util virt-sysprep
 check_util qemu-system-x86_64
 check_util qemu-system-ppc64
+check_util qemu-system-aarch64
 check_util wget
 check_util virt-copy-out
 
@@ -295,6 +307,9 @@ case $ARCH in
 		;;
 	ppc64)
 		run_ppc64
+		;;
+	aarch64)
+		run_aarch64
 		;;
 	*)
 		error "Unsupported architecture \"$ARCH\""
