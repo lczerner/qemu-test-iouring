@@ -101,8 +101,8 @@ run_x86_64()
 {
 	[ -n "$TEST_DEBUG" ] && return
 
-	qemu-system-x86_64 -enable-kvm -m 8192 -smp 12 -cpu host \
-		-drive format=qcow2,index=0,if=virtio,file=$IMG \
+	qemu-system-x86_64 -enable-kvm -m $GUEST_MEMORY -smp $GUEST_CPUS \
+		-cpu host -drive format=qcow2,index=0,if=virtio,file=$IMG \
 		-drive file=$NVME_IMG,if=none,id=D22,format=raw \
 		-device nvme,drive=D22,serial=1234 \
 		-nographic
@@ -112,7 +112,7 @@ run_ppc64le()
 {
 	[ -n "$TEST_DEBUG" ] && return
 
-	qemu-system-ppc64 -M pseries-5.1 -m 8192 -smp 8 \
+	qemu-system-ppc64 -M pseries-5.1 -m $GUEST_MEMORY -smp $GUEST_CPUS \
 		-drive format=qcow2,index=0,if=virtio,file=$IMG \
 		-drive file=$NVME_IMG,if=none,id=D22,format=raw \
 		-device nvme,drive=D22,serial=1234 \
@@ -168,6 +168,8 @@ TEST_EXCLUDE=""
 IMG="https://ewr.edge.kernel.org/fedora-buffet/fedora/linux/releases/32/Cloud/x86_64/images/Fedora-Cloud-Base-32-1.6.x86_64.qcow2"
 NVME_IMG=""
 LIBURING_GIT="git://git.kernel.dk/liburing -b master"
+GUEST_CPUS=4
+GUEST_MEMORY=2048
 
 # To avoid hassle with overwriting specified commandline option with the
 # options from config file, just search of the -C option here, set the
@@ -267,6 +269,8 @@ printf "COPY_IN:\t\t${COPY_IN}\n"
 printf "Exclude tests:\t\t${TEST_EXCLUDE}\n"
 printf "Config file:\t\t${CONFIG_FILE}\n"
 printf "Liburing repository:\t${LIBURING_GIT}\n"
+printf "Guest memory:\t\t${GUEST_MEMORY}\n"
+printf "Guest CPUs:\t\t${GUEST_CPUS}\n"
 
 # Copy the image and run on the copy instead
 copy_image
