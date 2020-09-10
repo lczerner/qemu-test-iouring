@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-2.0
 
 cat config.example | awk '{print "\t" $0}' > readme.tmp
 perl -pe 's/^\<CONFIGURATION FILE\>$/`cat readme.tmp`/e' README.md.in > README.md

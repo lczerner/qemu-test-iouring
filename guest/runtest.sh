@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-2.0
 
 LOG_DIR="/root/logs"
 mkdir -p $LOG_DIR

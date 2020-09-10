@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-2.0
 
 SUPPORTED_ARCH="x86_64 ppc64"
 CONFIG_FILE="./config.local"
