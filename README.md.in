@@ -77,70 +77,9 @@ Then, you can run the tests for example like this:
 
 You can find example configuration file in `config.example`
 
-	# Configuration file for qemu-test-iouring. Copy this file to config.local,
-	# nncomment and specify values to change defaults.
-	#
-	# Default architecture
-	# ARCH="x86_64"
-	#
-	# Initialize the image before running virtual machine
-	# 1 - initialize the image (default)
-	# 0 - do not initialize the image
-	# IMG_INIT=1
-	#
-	# Do not run on spefified image, but rather create copy of it first
-	# and run on that.
-	# 0 - run on the provided image (default)
-	# 1 - run on the copy of the provided image
-	# COPY_IMG=0
-	#
-	# Specify additional file to copy into the virtual machine. See
-	# man virt-builder for more information on --copy-in option
-	# COPY_IN=""
-	#
-	# List of excluded tests
-	# TEST_EXCLUDE=""
-	#
-	# Default image to run with. Will be overriden by -I option
-	# IMG=""
-	#
-	# Default nvme image to run with. Will be overriden by -N option
-	# NVME_IMG=""
-	#
-	# Specify liburing git repository and optionaly branch
-	# LIBURING_GIT="git://git.kernel.dk/liburing -b master"
-	#
-	# How many cpus should the guest virtual machine have.
-	# GUEST_CPUS=4
-	#
-	# How much memory should the quest virtual machine have.
-	# GUEST_MEMORY=2048
-
+<CONFIGURATION FILE>
 ## Usage
 
 You can see what options are supported using help `./qemu-test-iouring.sh -h`
 
-	Usage: ./qemu-test-iouring.sh [-h] [-n] [-d] [-c] [-a ARCH] [-I IMG] [-r REPO] [-N NVME]
-		-h		Print this help
-		-C CONFIG	Specify custom configuration file. This option
-				can only be specified once. (Default "./config.local")
-		-a ARCH		Specify architecture to run (default: x86_64).
-				Supported: x86_64 ppc64le
-		-I IMG		OS image with Fedora, Centos or Rhel. Can be
-				existing file, or http(s) url.
-		-N NVME		Nvme image to run on. It needs to be at least
-				1GB in size.
-		-r REPO		Specify yum repository file to include in guest.
-				Can be repeated to include multiple files and
-				implies image initialization.
-		-n		Do not initialize the image with virt-sysprep
-		-d		Do not run liburing tests on startup. Implies
-				image initialization.
-		-c		Do not run on specified image, but rather create
-				copy of it first.
-		-e		Exclude test. Can be repeated to exclude
-				multiple tests.
-		-p PKG		RPM package to install in guest
-	
-	Example: ././qemu-test-iouring.sh -a ppc64le -r test.repo -c -I fedora.img -N nvme.img
-
+<USAGE MESSAGE>

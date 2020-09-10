@@ -1,4 +1,3 @@
-#
 # Configuration file for qemu-test-iouring. Copy this file to config.local,
 # nncomment and specify values to change defaults.
 #

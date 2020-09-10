@@ -136,14 +136,6 @@ exit_cleanup()
 	fi
 }
 
-# Check for required utilities
-check_util truncate
-check_util virt-sysprep
-check_util qemu-system-x86_64
-check_util qemu-system-ppc64
-check_util wget
-check_util virt-copy-out
-
 # Set default options
 GUEST_LOG_DIR="/root/logs"
 GUEST_DIR="./guest"
@@ -242,8 +234,15 @@ while getopts "ha:dr:I:ncN:e:p:C:" option; do
 	esac
 done
 
-# Download OS image if needed
+# Check for required utilities
+check_util truncate
+check_util virt-sysprep
+check_util qemu-system-x86_64
+check_util qemu-system-ppc64
+check_util wget
+check_util virt-copy-out
 
+# Download OS image if needed
 # Is it http or https link ?
 echo $IMG | grep -E '^(http|https)://' > /dev/null 2>&1
 if [ $? -eq 0 ]; then
